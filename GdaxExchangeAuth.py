@@ -45,8 +45,8 @@ volume = currentPriceResult.json()['volume']
 print(currentPriceResult.json())
 print(volume)
 
-#orderBookResult = requests.get(API_URL + 'products/ETH-USD/book?level=3', auth=auth)
-#gdaxOrderBook = GdaxOrderBook(orderBookResult.json())
+orderBookResult = requests.get(API_URL + 'products/ETH-USD/book?level=3', auth=auth)
+gdaxOrderBook = GdaxOrderBook(currentPrice, volume, orderBookResult.json())
 
 
 #print(r.json())
