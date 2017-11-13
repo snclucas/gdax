@@ -1,9 +1,5 @@
-import json, hmac, hashlib, time, requests, base64, os
+import hmac, hashlib, time, base64
 from requests.auth import AuthBase
-
-
-# Create custom authentication for Exchange
-from GdaxOrderBook import GdaxOrderBook
 
 
 class GdaxExchangeAuth(AuthBase):
@@ -28,43 +24,3 @@ class GdaxExchangeAuth(AuthBase):
             'Content-Type': 'application/json'
         })
         return request
-
-API_KEY = os.environ['API_KEY']
-API_SECRET = os.environ['API_SECRET']
-API_PASS = os.environ['API_PASS']
-API_URL = os.environ['API_URL']
-auth = GdaxExchangeAuth(API_KEY, API_SECRET, API_PASS)
-
-# Get accounts
-#r = requests.get(API_URL + 'orders?status=open', auth=auth)
-
-
-currentPriceResult = requests.get(API_URL + 'products/ETH-USD/ticker', auth=auth)
-currentPrice = currentPriceResult.json()['price']
-volume = currentPriceResult.json()['volume']
-print(currentPriceResult.json())
-print(volume)
-
-orderBookResult = requests.get(API_URL + 'products/ETH-USD/book?level=3', auth=auth)
-gdaxOrderBook = GdaxOrderBook(1000)
-gdaxOrderBook.save(currentPrice, volume, orderBookResult.json())
-
-print(gdaxOrderBook.json())
-
-#print(r.json())
-
-
-
-
-# [{"id": "a1b2c3d4", "balance":...
-
-# Place an order
-order = {
-    'size': 1.0,
-    'price': 1.0,
-    'side': 'buy',
-    'product_id': 'BTC-USD',
-}
-#r = requests.post(api_url + 'orders', json=order, auth=auth)
-#print(r.json())
-# {"id": "0428b97b-bec1-429e-a94c-59992926778d"}

@@ -37,7 +37,7 @@ subscribe_string_tosend_json = json.dumps(subscribe_string_tosend2)
 
 
 def on_message(ws, message):
-    gdaxOrderBook.update_order_book(message)
+    gdaxOrderBook.update_order_book_by_websocket(message)
     # print(message)
 
 
@@ -59,9 +59,9 @@ def on_open(ws):
 if __name__ == "__main__":
     websocket.enableTrace(True)
     ws = websocket.WebSocketApp('wss://ws-feed.gdax.com',
-                                    on_message=on_message,
-                                    on_error=on_error,
-                                    on_close=on_close)
+                                on_message=on_message,
+                                on_error=on_error,
+                                on_close=on_close)
 
     ws.on_open = on_open
     ws.run_forever()
