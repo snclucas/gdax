@@ -21,7 +21,7 @@ volume = currentPriceResult.json()['volume']
 
 orderBookResult = requests.get(API_URL + 'products/ETH-USD/book?level=3', auth=auth)
 
-depth = 100
+depth = 500
 increment=0.01
 gdaxOrderBook = GdaxOrderBook(current_price=currentPrice, depth=depth, increment=increment)
 gdaxOrderBook.save(currentPrice, volume, orderBookResult.json())
@@ -76,6 +76,7 @@ plt.plot()
 def update_plot():
     print("updating plot")
     [total, asks, bids] = gdaxOrderBook.get_snapshot(',')
+    print(gdaxOrderBook.get_statistics())
     total_sum = []
     running_total = 0.0
     for i in range(0, depth):
@@ -104,8 +105,10 @@ def update_plot():
     ax3 = plt.subplot2grid((2, 3), (0, 2), rowspan=2)
     if float(price_delta) > 0:
         ax3.arrow(0.5, 0.25, 0.0, 0.5, head_width=0.05, head_length=0.1, fc='k', ec='k')
-    else:
+    elif float(price_delta) < 0:
         ax3.arrow(0.5, 0.75, 0.0, -0.5, head_width=0.05, head_length=0.1, fc='k', ec='k')
+    else:
+        ax3.arrow(0.25, 0.5, 0.75, 0.0, head_width=0.05, head_length=0.1, fc='k', ec='k')
 
     plt.pause(0.05)
 

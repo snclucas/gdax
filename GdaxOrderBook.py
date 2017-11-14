@@ -16,6 +16,12 @@ class GdaxOrderBook:
         self.lowest_bid_key = 0
         self.highest_bid_key = 0
 
+        self.stats = {'asks': {}, 'bids': {}}
+        self.ask_count = 0
+        self.bid_count = 0
+        self.ask_size = 0
+        self.bid_size = 0
+
         self.order_book = {'asks': collections.OrderedDict(), 'bids': collections.OrderedDict()}
 
         self.__create_order_book_dict__(self.depth, self.current_price, self.increment)
@@ -76,15 +82,32 @@ class GdaxOrderBook:
             total_arr.append(ask_total - bid_total)
         return total_arr, ask_arr, bid_arr
 
+    def get_statistics(self):
+        return_json = {
+            "ask_count": self.ask_count,
+            "bid_count": self.bid_count,
+            "bid_size": self.bid_size,
+            "ask_size": self.ask_size
+        }
+        self.ask_count = 0
+        self.bid_count = 0
+        self.bid_size = 0
+        self.ask_size = 0
+        return return_json
+
     def json(self):
         return json.dumps(self.__dict__)
 
     def __update_order_book__(self, type_in, price_in, size_in):
         if type_in == 'buy':
             type_in = 'bids'
+            self.bid_count = int(self.bid_count) + 1
+            self.bid_size = float(self.bid_size) + float(size_in)
 
         if type_in == 'sell':
             type_in = 'asks'
+            self.ask_count = int(self.ask_count) + 1
+            self.ask_size = float(self.ask_size) + float(size_in)
 
         key = self.__get_key__(0, price_in, type_in)
         if key in self.order_book[type_in]:
