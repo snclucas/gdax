@@ -1,12 +1,9 @@
 import websocket
-import _thread
+import threading
 import json
-import os
-import requests
+import requests, os, time
 import matplotlib.pyplot as plt
 import numpy as np
-import time
-from multiprocessing import Process
 
 from GdaxExchangeAuth import GdaxExchangeAuth
 from GdaxOrderBook import GdaxOrderBook
@@ -24,7 +21,7 @@ volume = currentPriceResult.json()['volume']
 
 orderBookResult = requests.get(API_URL + 'products/ETH-USD/book?level=3', auth=auth)
 
-depth = 200
+depth = 2000
 increment=0.01
 gdaxOrderBook = GdaxOrderBook(current_price=currentPrice, depth=depth, increment=increment)
 gdaxOrderBook.save(currentPrice, volume, orderBookResult.json())
@@ -43,53 +40,54 @@ subscribe_string_tosend = {
 subscribe_string_tosend_json = json.dumps(subscribe_string_tosend)
 
 
-def save_snapshot():
-    print("save_snapshot")
+def on_message(ws, message):
+    msg_json = json.loads(message)
+    if msg_json['type'] == 'l2update':
+        gdaxOrderBook.update_order_book_by_websocket(message)
+
+
+def on_close(ws):
+    print ("### closed ###")
+
+
+def on_open(ws):
+    ws.send(subscribe_string_tosend_json)
+
+x = np.linspace(0, (float(depth) / 100.0) - increment, depth)
+plt.ion()
+plt.show()
+plt.plot()
+
+
+def update_plot():
+    print("updating plot")
     [total, asks, bids] = gdaxOrderBook.get_snapshot(',')
     total_sum = []
     running_total = 0.0
     for i in range(0, depth):
         running_total = running_total + (depth - i) * total[i] / depth
         total_sum.append(running_total)
-    file = open('data.txt', 'a')
-    file.write(str(total_sum)+'\n')
-    file.close()
-    time.sleep(2)
 
-def on_message(ws, message):
-    msg_json = json.loads(message)
-    if msg_json['type'] == 'l2update':
-        gdaxOrderBook.update_order_book_by_websocket(message)
-        print("dd")
-
-
-def on_error(ws, error):
-    print(error)
-
-
-def on_close(ws):
-    print("### closed ###")
-
-
-def on_open(ws):
-    def run():
-        ws.send(subscribe_string_tosend_json)
-
-    _thread.start_new_thread(run, ())
+    plt.cla()
+    plt.plot(x, total_sum)
+    plt.draw()
+    plt.pause(0.05)
 
 
 if __name__ == "__main__":
     websocket.enableTrace(True)
-    ws = websocket.WebSocketApp('wss://ws-feed.gdax.com',
-                                on_message=on_message,
-                                on_error=on_error,
-                                on_close=on_close)
+    ws = websocket.WebSocketApp('wss://ws-feed.gdax.com', on_message = on_message, on_open = on_open, on_close = on_close)
+    wst = threading.Thread(target=ws.run_forever)
+    wst.daemon = True
+    wst.start()
 
-    p = Process(target=save_snapshot)
-    p.start()
-    p.join()
+    conn_timeout = 5
+    while not ws.sock.connected and conn_timeout:
+        time.sleep(1)
+        conn_timeout -= 1
 
-    ws.on_open = on_open
-    ws.run_forever()
-
-
+    msg_counter = 0
+    while ws.sock.connected:
+        time.sleep(1)
+        print("plot")
+        update_plot()

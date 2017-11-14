@@ -42,25 +42,37 @@ subscribe_string_tosend = {
 
 subscribe_string_tosend_json = json.dumps(subscribe_string_tosend)
 
+x = np.linspace(0, (float(depth) / 100.0) - increment, depth)
+plt.ion()
+plt.show()
+plt.plot()
 
-def save_snapshot():
-    print("save_snapshot")
+
+def update_plot():
+    print("updating plot")
     [total, asks, bids] = gdaxOrderBook.get_snapshot(',')
     total_sum = []
     running_total = 0.0
     for i in range(0, depth):
         running_total = running_total + (depth - i) * total[i] / depth
         total_sum.append(running_total)
-    file = open('data.txt', 'a')
-    file.write(str(total_sum)+'\n')
-    file.close()
+
+    plt.cla()
+    plt.plot(x, total_sum)
+    plt.draw()
+    plt.pause(0.05)
     time.sleep(2)
+
+p = Process(target=update_plot)
+p.start()
+p.join()
+
 
 def on_message(ws, message):
     msg_json = json.loads(message)
     if msg_json['type'] == 'l2update':
         gdaxOrderBook.update_order_book_by_websocket(message)
-        print("dd")
+        # update_plot()
 
 
 def on_error(ws, error):
@@ -85,11 +97,8 @@ if __name__ == "__main__":
                                 on_error=on_error,
                                 on_close=on_close)
 
-    p = Process(target=save_snapshot)
-    p.start()
-    p.join()
-
     ws.on_open = on_open
     ws.run_forever()
+
 
 

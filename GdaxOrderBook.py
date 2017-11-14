@@ -26,7 +26,6 @@ class GdaxOrderBook:
     def update_order_book_by_websocket(self, update):
         update_json = json.loads(update)
         changes = update_json['changes']
-        print(changes)
         buy_or_sell = changes[0][0]
         price = changes[0][1]
         size = changes[0][2]

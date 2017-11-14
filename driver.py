@@ -66,9 +66,7 @@ for ii in range(0, 10):
     time.sleep(2)
 
 
-file = open('bids.txt', 'w')
-file.write(str(gdaxOrderBook.get_snapshot(',')))
-file.close()
+
 
 #print(r.json())
 
