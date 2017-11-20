@@ -24,7 +24,7 @@ orderBookResult = requests.get(API_URL + 'products/ETH-USD/book?level=3', auth=a
 depth = 2000
 increment=0.01
 gdaxOrderBook = GdaxOrderBook(current_price=currentPrice, depth=depth, increment=increment)
-gdaxOrderBook.save(currentPrice, volume, orderBookResult.json())
+gdaxOrderBook.save(currentPrice, volume, orderBookResult.json(), level=3)
 
 
 subscribe_string_tosend = {

@@ -16,12 +16,17 @@ class GdaxOrderBook:
         self.lowest_bid_key = 0
         self.highest_bid_key = 0
 
+        self.best_bid = {}
+        self.best_ask = {}
+
         self.order_book = {'asks': collections.OrderedDict(), 'bids': collections.OrderedDict()}
 
         self.__create_order_book_dict__(self.depth, self.current_price, self.increment)
-        d=4
 
         # poll to get fu,l order book here first
+
+    # def get_best_bid(self):
+    #    return float(self.order_book['bids'][ask_key])
 
     def update_order_book_by_websocket(self, update):
         update_json = json.loads(update)
@@ -31,24 +36,29 @@ class GdaxOrderBook:
         size = changes[0][2]
         self.__update_order_book__(buy_or_sell, price, size)
 
-    def save(self, current_price, volume, json_order_book):
+    def save(self, current_price, volume, json_order_book, level):
         self.date_time_stamp = str(datetime.datetime.now())
         self.current_price = current_price
         self.volume = volume
 
-        reversed_asks = list(reversed(json_order_book['asks'][:self.depth]))
+        if level == 1:
+            self.best_ask = json_order_book['asks'][0]
+            self.best_bid = json_order_book['bids'][0]
 
-        for x in range(0, self.depth):
-            price = reversed_asks[x][0]
-            size = reversed_asks[x][1]
-            self.__update_order_book__('asks', price, size)
+        if level == 3:
 
-        for x in range(0, self.depth):
-            price = json_order_book['bids'][x][0]
-            size = json_order_book['bids'][x][1]
-            self.__update_order_book__('bids', price, size)
+            reversed_asks = list(reversed(json_order_book['asks'][:self.depth]))
 
-        f=4
+            for x in range(0, self.depth):
+                price = reversed_asks[x][0]
+                size = reversed_asks[x][1]
+                self.__update_order_book__('asks', price, size)
+
+            for x in range(0, self.depth):
+                price = json_order_book['bids'][x][0]
+                size = json_order_book['bids'][x][1]
+                self.__update_order_book__('bids', price, size)
+
 
         '''
         E.g. current price 300.00

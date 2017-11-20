@@ -11,7 +11,12 @@ class GdaxExchangeAuth(AuthBase):
     def __call__(self, request):
         timestamp = str(time.time())
 
-        message = timestamp + request.method + request.path_url + (request.body or '')
+        if request.body is not None:
+            r = request.body.decode()
+        else:
+            r = request.body
+
+        message = timestamp + request.method + request.path_url + (r or '')
         hmac_key = base64.b64decode(self.secret_key)
         signature = hmac.new(hmac_key, message.encode(), hashlib.sha256)
         signature_b64 = base64.b64encode(signature.digest())
