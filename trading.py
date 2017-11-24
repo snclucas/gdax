@@ -12,6 +12,7 @@ auth = GdaxExchangeAuth(API_KEY, API_SECRET, API_PASS)
 
 safety = True
 
+
 def get_account_available(currency):
     account_result = requests.get(API_URL + 'accounts', auth=auth)
     account_result_json = account_result.json()
@@ -26,7 +27,7 @@ def get_all_orders():
     return orders_result_json
 
 
-def get_orders(side='all', product_id='eth'):
+def __get_orders__(product_id='ETH-USD', side='all'):
     orders_result = requests.get(API_URL + 'orders?status=open', auth=auth)
     orders_result_json = orders_result.json()
 
@@ -38,9 +39,10 @@ def get_orders(side='all', product_id='eth'):
     return None
 
 
-def update_order_price(product_id, new_price):
-    order = get_orders(product_id)
-    best = __get_best_bid_ask__(product_id)
+def update_order_price(crypto='eth', new_price=-1):
+    product_id = __make_product_id__(crypto)
+    order = __get_orders__(product_id)
+    best = get_best_bid_ask(product_id)
 
     if order is None:
         print("No open order found")
@@ -53,45 +55,26 @@ def update_order_price(product_id, new_price):
     order_product = order['product_id']
 
     if order_side == 'buy':
-        if new_price > order_price:
+        if new_price > best['bid']:
             print("Error: Buy price above best bid")
             return
     if order_side == 'sell':
-        if new_price > order_price:
+        if new_price < best['ask']:
             print("Error: Sell price below best ask")
             return
 
-    cancel_order(order_id)
-    limit_order(order_size, order_side, order_product)
+    cancel_order()
+    limit_order(order_size, order_side, crypto, new_price)
 
 
-def cancel_order(order_id):
-    order_delete_result = requests.delete(API_URL + 'order/'+order_id, auth=auth)
+def cancel_order():
+    order_delete_result = requests.delete(API_URL + 'orders', auth=auth)
     return order_delete_result.json()
-
-
-def cancel_order(side, product_id):
-    side = side.lower()
-    crypto_id = product_id.upper()
-    product_id = crypto_id + '-USD'
-    print(crypto_id)
-    if side.lower() == 'all' and crypto_id.lower() == 'all':
-        cancel_result = requests.delete(API_URL + 'orders', auth=auth)
-        return cancel_result.json()
-
-    orders = get_orders(side, product_id)
-    if orders is None:
-        print("No open order found")
-        return
-    else:
-        for order in orders:
-            requests.delete(API_URL + 'order/'+order['id'], auth=auth)
-        return "Orders cancelled"
 
 
 def limit_order(amount, side, product_id, price=-1):
     crypto_id = product_id.upper()
-    product_id = crypto_id+'-USD'
+    product_id = __make_product_id__(product_id)
     if side != 'buy' and side != 'sell':
         print("You need to buy or sell")
         return
@@ -100,7 +83,7 @@ def limit_order(amount, side, product_id, price=-1):
         print("Product not found")
         return
 
-    best = __get_best_bid_ask__(product_id)
+    best = get_best_bid_ask(product_id)
 
     crypto_amount = float(amount)
 
@@ -146,13 +129,17 @@ def limit_order(amount, side, product_id, price=-1):
     }
     print(order)
     # print(str(json.loads(json.dumps(order))))
-    #r = requests.post(API_URL + 'orders', json=order, auth=auth)
+    r = requests.post(API_URL + 'orders', json=order, auth=auth)
     #return print(r.json())
 
 
-def __get_best_bid_ask__(product_id):
+def get_best_bid_ask(product_id):
     order_book_result = requests.get(API_URL + 'products/' + product_id + '/book?level=1', auth=auth)
     json_order_book = order_book_result.json()
     best_ask = json_order_book['asks'][0][0]
     best_bid = json_order_book['bids'][0][0]
     return {"ask": best_ask, "bid": best_bid}
+
+
+def __make_product_id__(crypto):
+    return crypto.upper() + '-USD'

@@ -24,7 +24,14 @@ class GdaxTrader(cmd.Cmd):
     misc_header = 'misc_header'
     undoc_header = 'undoc_header'
 
-    ruler = '-'
+    def do_update(self, line):
+        args = line.split()
+        if len(args) != 2:
+            print("Usage: update eth <new price>")
+        else:
+            product_id = args[0]
+            new_price = args[1]
+            trading.update_order_price(product_id, new_price)
 
     def do_buy(self, line):
         if len(line) == 0:
@@ -58,20 +65,7 @@ class GdaxTrader(cmd.Cmd):
                 trading.limit_order(-1, 'sell', product)
 
     def do_cancel(self, line):
-        if len(line) == 0:
-            print("Usage: cancel buy eth")
-        else:
-            args = line.split()
-            if len(args) == 2:
-                side = args[0]
-                product = args[1]
-                trading.cancel_order(side, product)
-            else:
-                product = args[0]
-                if product == 'all':
-                    trading.cancel_order('all', 'all')
-                else:
-                    trading.cancel_order('all', product)
+        trading.cancel_order()
 
     def do_plot(self, line):
         args = line.split()

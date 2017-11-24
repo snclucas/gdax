@@ -1,72 +1,46 @@
-import requests
-import os
-import matplotlib.pyplot as plt
-import numpy as np
+import pandas as pd
 import time
 
-from GdaxExchangeAuth import GdaxExchangeAuth
-from GdaxOrderBook import GdaxOrderBook
+import trading
+import analysis
+import gdax_data
 
-API_KEY = os.environ['API_KEY']
-API_SECRET = os.environ['API_SECRET']
-API_PASS = os.environ['API_PASS']
-API_URL = os.environ['API_URL']
-auth = GdaxExchangeAuth(API_KEY, API_SECRET, API_PASS)
+intervals = [1]
 
+best_bid_ask = trading.get_best_bid_ask('ETH-USD')
+best_bid = float(best_bid_ask['bid'])
 
-currentPriceResult = requests.get(API_URL + 'products/ETH-USD/ticker', auth=auth)
-currentPrice = currentPriceResult.json()['price']
-volume = currentPriceResult.json()['volume']
+display_str = ""
 
-orderBookResult = requests.get(API_URL + 'products/ETH-USD/book?level=3', auth=auth)
+for int_ in intervals:
+    data, start, end = gdax_data.get_data("ETH-USD", int_, 10)
+    df = pd.DataFrame(list(reversed(data)), columns=['date', 'low', 'high', 'open', 'close', 'volume'])
+    df2 = pd.DataFrame(data, columns=['date', 'low', 'high', 'open', 'close', 'volume'])
+    print(df2)
+    analysis.add_macd(df)
+    analysis.add_bol(df)
 
-depth = 200
-increment=0.01
-gdaxOrderBook = GdaxOrderBook(current_price=currentPrice, depth=depth, increment=increment)
+    last_data = df.iloc[-1]
 
+    macd = round(float(last_data['MACD']), 2)
+    upper_bol = float(last_data['Bol_upper'])
+    lower_bol = float(last_data['Bol_lower'])
+    bol_range = upper_bol - lower_bol
+    range_pc = round(((1 - (upper_bol - best_bid) / bol_range) * 100), 2)
 
-# axes = plt.subplots(2,1)
+    print(best_bid)
+    print(upper_bol)
+    print(lower_bol)
+    print(bol_range)
+    print(range_pc)
+    print("------------------")
 
-x = np.linspace(0, (float(depth)/100.0)-increment, depth)
-plt.ion()
-plt.show()
+    display_str = display_str + " " + str(range_pc) + "/" + str(macd)
+    time.sleep(1)
 
-# axes.ion()
-
-for ii in range(0, 10):
-    gdaxOrderBook.save(currentPrice, volume, orderBookResult.json())
-
-    [total, asks, bids] = gdaxOrderBook.get_snapshot(',')
-
-    total_sum = []
-    running_total = 0.0
-    for i in range(0, depth):
-        running_total = running_total + total[i]
-        total_sum.append(running_total)
-
-    #print(total)
-    #print((depth/100)-1)
-
-    #print(x)
-
-    plt.plot(x, total)
-    plt.draw()
-    plt.pause(0.05)
-
-    # axes[0].plot(x, total, label='total')
-    # axes[0].plot(x, asks, label='asks')
-    # axes[0].plot(x, bids, label='bids')
-    # axes[0].legend()
-    #
-    # axes[1].plot(x, total_sum, label='total_sum')
-    # axes[1].legend()
-    #
-    # plt.show()
-
-    time.sleep(2)
+print(display_str)
 
 
-
-
-#print(r.json())
+# for i in range(-5, 5):
+#     analysis.correlation(data, i)
 
