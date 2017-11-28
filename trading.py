@@ -14,15 +14,44 @@ safety = True
 
 
 def get_account_available(currency):
+    product_id = __make_product_id__(currency)
     account_result = requests.get(API_URL + 'accounts', auth=auth)
     account_result_json = account_result.json()
+
+    in_account = 0
     for account in account_result_json:
         if account['currency'] == currency:
-            return account['available']
+            in_account = account['available']
+
+    # Now see if there are open orders
+    open_orders = get_all_orders("open")
+    total_in_open_orders = 0
+    for order in open_orders:
+        if order['product_id'] == product_id:
+            total_in_open_orders = total_in_open_orders + float(order['size'])
+    if total_in_open_orders > 0:
+        open_orders_string = " [" + str(total_in_open_orders) + " in open orders]"
+    else:
+        open_orders_string = ""
+    return str(currency.upper()) + ": " + str(in_account) + open_orders_string
 
 
-def get_all_orders():
-    orders_result = requests.get(API_URL + 'orders?status=open', auth=auth)
+def list_orders(order_type):
+    order_strings = []
+    orders = get_all_orders(order_type)
+    for order in orders:
+        if 'message' not in order:
+            order_string = order['status'] + " : " + order['side'] + " " + order['size'] + " " + order['product_id']
+            order_strings.append(order_string)
+    return order_strings
+
+
+def get_all_orders(status="open"):
+    if status == 'all':
+        url = 'orders'
+    else:
+        url = 'orders?status=' + status
+    orders_result = requests.get(API_URL + url, auth=auth)
     orders_result_json = orders_result.json()
     return orders_result_json
 
@@ -143,3 +172,9 @@ def get_best_bid_ask(product_id):
 
 def __make_product_id__(crypto):
     return crypto.upper() + '-USD'
+
+def __is_crypto__(currency):
+    currency = currency.lower()
+    if currency == 'eth' or currency == 'btc' or currency == 'ltc':
+        return True
+    return False

@@ -77,6 +77,14 @@ class GdaxTrader(cmd.Cmd):
             product_id = args[0]
             historic_plotter.plot(product_id, 3600)
 
+    def do_list(self, line):
+        args = line.split()
+        if len(args) == 1:
+            order_type = args[0]
+            print(trading.list_orders(order_type))
+        else:
+            print("Usage: list all | open | pending")
+
     def do_fiat(self, line):
         print(trading.get_account_available('USD'))
 
