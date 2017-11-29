@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import gdax_data
 import analysis
+import trading
 
 from GdaxExchangeAuth import GdaxExchangeAuth
 
@@ -20,13 +21,7 @@ def plot(product_id, granularity=60, max=200):
     gdax_data_, start, end = gdax_data.get_data(product_id, granularity, max)
 
     df = pd.DataFrame(list(reversed(gdax_data_)), columns=['date', 'low', 'high', 'open', 'close', 'volume'])
-
-    #df['date'] = start + df.index*timedelta(seconds=(max * int(granularity)))
-    #df['date'] = max - df.index
-
-    df['date2'] = datetime.fromtimestamp(df['date']).isoformat()
-
-    print(df)
+    print(trading.get_best_bid_ask("ETH-USD"))
 
     analysis.add_macd(df)
     analysis.add_bol(df)
@@ -37,3 +32,5 @@ def plot(product_id, granularity=60, max=200):
     plt.show(block=False)
     return
 
+if __name__ == '__main__':
+    plot("eth", 60, 200)

@@ -41,7 +41,8 @@ def list_orders(order_type):
     orders = get_all_orders(order_type)
     for order in orders:
         if 'message' not in order:
-            order_string = order['status'] + " : " + order['side'] + " " + order['size'] + " " + order['product_id']
+            order_string = order['status'] + " : " + order['side'] + " " + \
+                           order['size'] + " " + order['product_id'] + " @ " + order['price']
             order_strings.append(order_string)
     return order_strings
 
