@@ -1,11 +1,9 @@
 import cmd
 import os
-import json
 
-import historic_plotter
 import trading
-
-from GdaxExchangeAuth import GdaxExchangeAuth
+from gdax.GdaxExchangeAuth import GdaxExchangeAuth
+from plots import historic_plotter
 
 API_KEY = os.environ['API_KEY']
 API_SECRET = os.environ['API_SECRET']
@@ -84,6 +82,9 @@ class GdaxTrader(cmd.Cmd):
             print(trading.list_orders(order_type))
         else:
             print("Usage: list all | open | pending")
+
+    # def do_strat(self, line):
+
 
     def do_fiat(self, line):
         print(trading.get_account_available('USD'))

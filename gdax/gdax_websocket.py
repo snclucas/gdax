@@ -1,16 +1,14 @@
-import websocket
 import _thread
 import json
 import os
-import requests
-import matplotlib.pyplot as plt
-import numpy as np
 import time
 from multiprocessing import Process
 
-from GdaxExchangeAuth import GdaxExchangeAuth
+import requests
+import websocket
 from GdaxOrderBook import GdaxOrderBook
 
+from gdax.GdaxExchangeAuth import GdaxExchangeAuth
 
 API_KEY = os.environ['API_KEY']
 API_SECRET = os.environ['API_SECRET']

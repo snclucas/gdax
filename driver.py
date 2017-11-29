@@ -1,9 +1,10 @@
-import pandas as pd
 import time
 
-import trading
+import pandas as pd
+
 import analysis
-import gdax_data
+import trading
+from data import gdax_data
 
 intervals = [60, 300, 600, 1200, 3600]
 
@@ -13,7 +14,7 @@ best_bid = float(best_bid_ask['bid'])
 display_str = ""
 
 for int_ in intervals:
-    data, start, end = gdax_data.get_data("ETH-USD", int_, 10)
+    data, start, end = gdax_data.get_data("ETH-USD", int_, 200)
     df = pd.DataFrame(list(reversed(data)), columns=['date', 'low', 'high', 'open', 'close', 'volume'])
     analysis.add_macd(df)
     analysis.add_bol(df)
@@ -27,11 +28,5 @@ for int_ in intervals:
     range_pc = round(((1 - (upper_bol - best_bid) / bol_range) * 100), 2)
 
     print(str(int_) + " " + str(range_pc) + "/" + str(macd) + "  ["
-          + str(lower_bol) + " <- " + str(best_bid) + " -> " + str(lower_bol) + "]")
+          + str(lower_bol) + " <- " + str(best_bid) + " -> " + str(upper_bol) + "]")
     time.sleep(1)
-
-
-
-# for i in range(-5, 5):
-#     analysis.correlation(data, i)
-

@@ -1,10 +1,11 @@
-import requests
+import json
 import os
 import sched
 import time
-import json
 
-from GdaxExchangeAuth import GdaxExchangeAuth
+import requests
+
+from gdax.GdaxExchangeAuth import GdaxExchangeAuth
 
 API_KEY = os.environ['API_KEY']
 API_SECRET = os.environ['API_SECRET']

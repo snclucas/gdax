@@ -1,21 +1,26 @@
-import pandas as pd
 import time
 
-import trading
+import pandas as pd
+
 import analysis
-import gdax_data
+import trading
+from data import gdax_data
 
 
-def run(intervals, product_id="ETH-USD", lower_limit=10, upper_limit=90):
+def name():
+    return "Boll"
+
+
+def run(intervals, product_id="ETH-USD", window=20, sd=2, lower_limit=10, upper_limit=90):
     best_bid_ask = trading.get_best_bid_ask(product_id)
     best_bid = float(best_bid_ask['bid'])
 
     results = []
 
     for int_ in intervals:
-        data, start, end = gdax_data.get_data("ETH-USD", int_, 10)
+        data, start, end = gdax_data.get_data(product_id, int_, window)
         df = pd.DataFrame(list(reversed(data)), columns=['date', 'low', 'high', 'open', 'close', 'volume'])
-        analysis.add_bol(df)
+        analysis.add_bol(df, window, sd)
 
         last_data = df.iloc[-1]
 
