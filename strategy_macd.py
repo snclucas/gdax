@@ -6,7 +6,7 @@ import analysis
 import gdax_data
 
 
-def run(intervals, product_id="ETH-USD", lower_limit=10, upper_limit=90):
+def run(intervals, product_id="ETH-USD", history=3):
     best_bid_ask = trading.get_best_bid_ask(product_id)
     best_bid = float(best_bid_ask['bid'])
 
@@ -15,9 +15,18 @@ def run(intervals, product_id="ETH-USD", lower_limit=10, upper_limit=90):
     for int_ in intervals:
         data, start, end = gdax_data.get_data("ETH-USD", int_, 10)
         df = pd.DataFrame(list(reversed(data)), columns=['date', 'low', 'high', 'open', 'close', 'volume'])
-        analysis.add_bol(df)
+        analysis.add_macd(df)
 
+        is_last_above_zero = False
+        for i in range(0, history):
+            print(-1-i)
+            data = df.iloc[-1-i]
+            if i == 0 and float(data['macd']) > 0.0:
+                is_last_above_zero = True
+
+        last_data_but_one = df.iloc[-2]
         last_data = df.iloc[-1]
+        print(last_data_but_one)
 
         upper_bol = round(float(last_data['Bol_upper']), 2)
         lower_bol = round(float(last_data['Bol_lower']), 2)

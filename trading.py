@@ -165,14 +165,18 @@ def limit_order(amount, side, product_id, price=-1):
 
 def get_best_bid_ask(product_id):
     order_book_result = requests.get(API_URL + 'products/' + product_id + '/book?level=1', auth=auth)
-    json_order_book = order_book_result.json()
-    best_ask = json_order_book['asks'][0][0]
-    best_bid = json_order_book['bids'][0][0]
-    return {"ask": best_ask, "bid": best_bid}
+    if order_book_result.status_code == 200:
+        json_order_book = order_book_result.json()
+        best_ask = json_order_book['asks'][0][0]
+        best_bid = json_order_book['bids'][0][0]
+        return {"ask": best_ask, "bid": best_bid}
+    else:
+        raise ValueError("Error getting best bid/ask: " + str(order_book_result.status_code))
 
 
 def __make_product_id__(crypto):
     return crypto.upper() + '-USD'
+
 
 def __is_crypto__(currency):
     currency = currency.lower()
