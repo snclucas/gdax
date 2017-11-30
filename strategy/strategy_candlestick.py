@@ -1,8 +1,6 @@
-import time
-
 import pandas as pd
 
-import analysis
+import indicators
 from data import gdax_data
 
 
@@ -10,17 +8,31 @@ def name():
     return "Candlestick"
 
 
-def run(intervals, product_id="ETH-USD"):
-    results = []
+def run(interval, product_id="ETH-USD"):
 
-    for int_ in intervals:
-        data, start, end = gdax_data.get_data(product_id, int_, 200)
-        df = pd.DataFrame(list(reversed(data)), columns=['date', 'low', 'high', 'open', 'close', 'volume'])
-        df = df.astype('float')
+    data, start, end = gdax_data.get_data(product_id, interval, 3)
+    df = pd.DataFrame(list(reversed(data)), columns=['date', 'low', 'high', 'open', 'close', 'volume'])
 
-        analysis.check_engulfing(df)
+    indicators.check_engulfing(df)
+    indicators.check_hammer(df)
+    indicators.check_doji(df)
 
-        # print(df)
+    res_string = ""
+    res_score = 0
+    last_data_point = df.iloc[-1]
+    if bool(last_data_point['engulfing']) is True:
+        res_string = res_string + "BUY (engulfing)"
+        res_score = res_score + 10
+
+    if bool(last_data_point['hammer']) is True:
+        res_string = res_string + "BUY (hammer)"
+        res_score = res_score + 10
+
+    if bool(last_data_point['doji']) is True:
+        res_string = res_string + "BUY (doji)"
+        res_score = res_score + 10
+
+    return {"score": res_score, "indicator": res_string}
 
 
 def check_engulfing(current_candle, last_candle1):

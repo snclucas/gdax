@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
-import analysis
+import indicators
 import trading
 from data import gdax_data
 from gdax.GdaxExchangeAuth import GdaxExchangeAuth
@@ -23,8 +23,8 @@ def plot(product_id, granularity=60, max=200):
     df = pd.DataFrame(list(reversed(gdax_data_)), columns=['date', 'low', 'high', 'open', 'close', 'volume'])
     print(trading.get_best_bid_ask(product_id))
 
-    analysis.add_macd(df)
-    analysis.add_bol(df)
+    indicators.add_macd(df)
+    indicators.add_bol(df)
 
     fig, axes = plt.subplots(nrows=2, ncols=1)
     df.plot(y=['close', 'Bol_upper', 'Bol_lower'], ax=axes[0])

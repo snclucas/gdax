@@ -2,7 +2,7 @@ import time
 
 import pandas as pd
 
-import analysis
+import indicators
 import trading
 from data import gdax_data
 
@@ -16,8 +16,8 @@ display_str = ""
 for int_ in intervals:
     data, start, end = gdax_data.get_data("ETH-USD", int_, 200)
     df = pd.DataFrame(list(reversed(data)), columns=['date', 'low', 'high', 'open', 'close', 'volume'])
-    analysis.add_macd(df)
-    analysis.add_bol(df)
+    indicators.add_macd(df)
+    indicators.add_bol(df)
 
     last_data = df.iloc[-1]
 
