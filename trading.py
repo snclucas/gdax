@@ -14,7 +14,6 @@ safety = True
 
 
 def get_account_available(currency):
-    product_id = __make_product_id__(currency)
     account_result = requests.get(API_URL + 'accounts', auth=auth)
     account_result_json = account_result.json()
 
@@ -23,17 +22,16 @@ def get_account_available(currency):
         if account['currency'] == currency:
             in_account = account['available']
 
-    # Now see if there are open orders
-    open_orders = get_all_orders("open")
-    total_in_open_orders = 0
-    for order in open_orders:
-        if order['product_id'] == product_id:
-            total_in_open_orders = total_in_open_orders + float(order['size'])
-    if total_in_open_orders > 0:
-        open_orders_string = " [" + str(total_in_open_orders) + " in open orders]"
-    else:
-        open_orders_string = ""
-    return str(currency.upper()) + ": " + str(in_account) + open_orders_string
+    return str(in_account)
+
+
+def sell_position(order_id):
+    order = get_order(order_id)
+
+
+def get_order(order_id):
+    order_result = requests.get(API_URL + 'orders/' + order_id, auth=auth)
+    return order_result.json()
 
 
 def list_orders(order_type):
@@ -97,14 +95,28 @@ def update_order_price(crypto='eth', new_price=-1):
     limit_order(order_size, order_side, crypto, new_price)
 
 
+def cancel_order_by_id(order_id):
+    order_delete_result = requests.delete(API_URL + 'orders/' + order_id, auth=auth)
+    return order_delete_result.json()
+
+
 def cancel_order():
     order_delete_result = requests.delete(API_URL + 'orders', auth=auth)
     return order_delete_result.json()
 
 
+def buy_best_limit(product_id, amount=-1):
+    balance_usd = get_account_available("USD")
+    best_price = get_best_bid_ask(product_id)['bid']
+    if amount < 0:
+        amount = (float(balance_usd)-1.0) / float(best_price)
+
+    return limit_order(amount, "buy", product_id, best_price)
+
+
 def limit_order(amount, side, product_id, price=-1):
-    crypto_id = product_id.upper()
-    product_id = __make_product_id__(product_id)
+    #crypto_id = product_id.upper()
+    #product_id = __make_product_id__(product_id)
     if side != 'buy' and side != 'sell':
         print("You need to buy or sell")
         return
@@ -160,7 +172,8 @@ def limit_order(amount, side, product_id, price=-1):
     print(order)
     # print(str(json.loads(json.dumps(order))))
     r = requests.post(API_URL + 'orders', json=order, auth=auth)
-    #return print(r.json())
+    order_result = r.json()
+    return order_result
 
 
 def get_best_bid_ask(product_id):

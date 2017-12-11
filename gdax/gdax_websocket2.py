@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import requests
 import websocket
-from GdaxOrderBook import GdaxOrderBook
+from gdax.GdaxOrderBook import GdaxOrderBook
 
 from gdax.GdaxExchangeAuth import GdaxExchangeAuth
 

@@ -7,7 +7,7 @@ import os
 import requests
 import time
 import websocket
-from GdaxOrderBook import GdaxOrderBook
+from gdax.GdaxOrderBook import GdaxOrderBook
 
 from gdax.GdaxExchangeAuth import GdaxExchangeAuth
 
