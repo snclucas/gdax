@@ -7,14 +7,6 @@ import math
 
 import trading
 
-from gdax.GdaxExchangeAuth import GdaxExchangeAuth
-
-API_KEY = os.environ['API_KEY']
-API_SECRET = os.environ['API_SECRET']
-API_PASS = os.environ['API_PASS']
-API_URL = os.environ['API_URL']
-auth = GdaxExchangeAuth(API_KEY, API_SECRET, API_PASS)
-
 
 def buyin(product_id, re_base=False, stop_loss=0.1, take_profit=0.1, trailing_stop_loss=True):
     order_placed = trading.buy_best_limit(product_id)
@@ -31,6 +23,7 @@ def buyin(product_id, re_base=False, stop_loss=0.1, take_profit=0.1, trailing_st
             order = trading.get_order(order_id)
             still_open = bool(order['settled']) is False
             best_bid_now = float(trading.get_best_bid_ask(product_id)['bid'])-1.0
+            time.sleep(1)
             print("Best bid now: " + str(best_bid_now))
 
             if best_bid_now > order_bid:
@@ -62,27 +55,6 @@ def buyin(product_id, re_base=False, stop_loss=0.1, take_profit=0.1, trailing_st
 
 
 
-
-
-
-def limit_order(amount, side, product):
-    order_book_result = requests.get(API_URL + 'products/'+product+'/book?level=1', auth=auth)
-    json_order_book = order_book_result.json()
-    best_ask = json_order_book['asks'][0]
-    best_bid = json_order_book['bids'][0]
-
-    limit_price = best_bid[0]
-
-    order = {
-        'size': str(amount),
-        'price': str(float(limit_price)-1),
-        'side': side,
-        'product_id': product,
-    }
-    print(order)
-    print(str(json.loads(json.dumps(order))))
-    r = requests.post(API_URL + 'orders', json=order, auth=auth)
-    print(r.json())
 
 
 s = sched.scheduler(time.time, time.sleep)

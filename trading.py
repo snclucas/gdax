@@ -15,12 +15,19 @@ safety = True
 
 def get_account_available(currency):
     account_result = requests.get(API_URL + 'accounts', auth=auth)
-    account_result_json = account_result.json()
-
+    print(API_URL + 'accounts')
+    print(account_result.content)
     in_account = 0
-    for account in account_result_json:
-        if account['currency'] == currency:
-            in_account = account['available']
+    if account_result.status_code == 200:
+        account_result_json = account_result.json()
+
+        for account in account_result_json:
+            if account['currency'] == currency:
+                in_account = account['available']
+
+    else:
+        print("Could not get balance, error code: " + str(account_result.status_code))
+        raise ValueError("Could not get balance")
 
     return str(in_account)
 

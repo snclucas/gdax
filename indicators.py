@@ -40,6 +40,18 @@ def check_doji(df):
                           check_doji_func(x['low'], x['high'], x['open'], x['close']), axis=1)
 
 
+def check_color(df):
+    df['color'] = df.apply(lambda x:
+                           check_color_func(x['open'], x['close']), axis=1)
+
+
+def check_color_func(cur_open, cur_close):
+    if cur_close >= cur_open:
+        return 'green'
+    else:
+        return 'red'
+
+
 def check_engulfing_func(cur_low, cur_high, cur_open, cur_close, prev_low, prev_high, prev_open, prev_close):
     if cur_close >= cur_open and prev_close < prev_open:
         if cur_open > prev_open and cur_close < prev_close:
@@ -80,3 +92,11 @@ def add_bol(df, window=20, sd=2):
                                                                                            min_periods=window).std()
     df['Bol_lower'] = df['close'].rolling(window=window).mean() - sd * df['close'].rolling(window=window,
                                                                                            min_periods=window).std()
+
+
+def add_ema(col_name, df, window=20):
+    df[col_name] = df['close'].rolling(window=window).mean()
+
+
+def add_sd(col_name, df, window=20):
+    df[col_name] = df['close'].rolling(window=window, min_periods=window).std()

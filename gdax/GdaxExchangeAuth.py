@@ -1,4 +1,4 @@
-import hmac, hashlib, time, base64
+import hmac, hashlib, time, base64, math
 from requests.auth import AuthBase
 
 
@@ -20,6 +20,9 @@ class GdaxExchangeAuth(AuthBase):
         hmac_key = base64.b64decode(self.secret_key)
         signature = hmac.new(hmac_key, message.encode(), hashlib.sha256)
         signature_b64 = base64.b64encode(signature.digest())
+
+        time.localtime(time.time())
+        print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
 
         request.headers.update({
             'CB-ACCESS-SIGN': signature_b64,

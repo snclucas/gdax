@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import requests
 import websocket
-from gdax.GdaxOrderBook import GdaxOrderBook
+from gdax.GdaxOrderBook import GdaxOrderBook as gdaxOrderBook
 
 from gdax.GdaxExchangeAuth import GdaxExchangeAuth
 

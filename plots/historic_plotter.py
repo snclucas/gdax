@@ -14,6 +14,8 @@ API_PASS = os.environ['API_PASS']
 API_URL = os.environ['API_URL']
 auth = GdaxExchangeAuth(API_KEY, API_SECRET, API_PASS)
 
+standalone = False
+
 
 def plot(product_id, granularity=60, max=200):
     crypto_id = product_id.upper()
@@ -29,8 +31,9 @@ def plot(product_id, granularity=60, max=200):
     fig, axes = plt.subplots(nrows=2, ncols=1)
     df.plot(y=['close', 'Bol_upper', 'Bol_lower'], ax=axes[0])
     df.plot(y=['MACD'], ax=axes[1])
-    plt.show(block=False)
+    plt.show(block=not standalone)
     return
 
 if __name__ == '__main__':
-    plot("eth", 3600, 200)
+    standalone = False
+    plot("eth", 60, 200)

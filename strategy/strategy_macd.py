@@ -49,4 +49,4 @@ def run(interval, product_id="ETH-USD", slow_ema=26, fast_ema=12, history=3):
     return {"score": res_score, "indicator": "MACD"}
 
 if __name__ == '__main__':
-    print(run([60, 120, 240, 600, 1200, 3600], "ETH-USD"))
+    print(run(600, "ETH-USD"))

@@ -67,4 +67,4 @@ def candle_color(candle):
 
 
 if __name__ == '__main__':
-    print(run([3600], "ETH-USD"))
+    print(run(3600, "ETH-USD"))
